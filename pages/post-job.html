@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <title>Pasang Lowongan - Disnaker</title>
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <div id="app"></div>
+  <script src="/js/utils.js"></script>
+  <script src="/data/seed.js"></script>
+  <script src="/js/database.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/settings.js"></script>
+  <script src="/js/components.js"></script>
+  <script src="/js/verification.js"></script>
+  <script src="/js/search.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!Auth.requireAuth(['company'])) return;
+      const user = Auth.getCurrentUser();
+      let selectedSkills = [];
+
+      const content = `
+        <div class="page-header">
+          <h1><i class="fas fa-plus-circle" style="color:var(--primary-500);margin-right:var(--space-3)"></i> Pasang Lowongan Baru</h1>
+          <p>Isi form di bawah untuk memasang lowongan kerja. Lowongan akan diverifikasi oleh admin sebelum dipublikasikan.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-body" style="max-width:800px;">
+            <form id="post-job-form" onsubmit="handlePostJob(event)">
+              <div class="form-group">
+                <label class="form-label">Judul Posisi <span class="required">*</span></label>
+                <input type="text" id="job-title" class="form-control" placeholder="contoh: Full Stack Developer" required>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Kategori <span class="required">*</span></label>
+                  <select class="form-control" id="job-category" required>
+                    <option value="">Pilih Kategori</option>
+                    ${Utils.categories.map(c => `<option value="${c}">${c}</option>`).join('')}
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Lokasi <span class="required">*</span></label>
+                  <select class="form-control" id="job-location" required>
+                    <option value="">Pilih Lokasi</option>
+                    ${Utils.locations.map(l => `<option value="${l}">${l}</option>`).join('')}
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Tipe Pekerjaan</label>
+                  <select class="form-control" id="job-type">
+                    <option value="Full-time">Full-time</option>
+                    <option value="Part-time">Part-time</option>
+                    <option value="Contract">Contract</option>
+                    <option value="Internship">Internship</option>
+                    <option value="Remote">Remote</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Pendidikan Minimal</label>
+                  <select class="form-control" id="job-education">
+                    <option value="SMA/SMK">SMA/SMK</option>
+                    <option value="D3">D3</option>
+                    <option value="S1" selected>S1</option>
+                    <option value="S2">S2</option>
+                    <option value="S3">S3</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">Gaji Minimum (Rp)</label>
+                  <input type="number" id="job-salary-min" class="form-control" placeholder="5000000" min="0" step="500000">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Gaji Maksimum (Rp)</label>
+                  <input type="number" id="job-salary-max" class="form-control" placeholder="10000000" min="0" step="500000">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Pengalaman Minimal (tahun)</label>
+                <input type="number" id="job-experience" class="form-control" placeholder="0" min="0" max="30" value="0">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Keahlian yang Dibutuhkan</label>
+                <div id="skills-container" style="display:flex;flex-wrap:wrap;gap:var(--space-2);margin-bottom:var(--space-2);"></div>
+                <select class="form-control" id="job-skills-select" onchange="addSkill(this.value)">
+                  <option value="">+ Tambah keahlian</option>
+                  ${Utils.skills.map(s => `<option value="${s}">${s}</option>`).join('')}
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Deskripsi Pekerjaan <span class="required">*</span></label>
+                <textarea class="form-control" id="job-description" placeholder="Jelaskan tentang pekerjaan ini..." required rows="5"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Persyaratan (satu per baris)</label>
+                <textarea class="form-control" id="job-requirements" placeholder="Pengalaman 2 tahun&#10;Menguasai JavaScript&#10;..." rows="4"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Benefit (satu per baris)</label>
+                <textarea class="form-control" id="job-benefits" placeholder="Gaji kompetitif&#10;BPJS&#10;..." rows="4"></textarea>
+              </div>
+              <div style="display:flex;gap:var(--space-3);margin-top:var(--space-6);">
+                <button type="submit" class="btn btn-primary btn-lg"><i class="fas fa-paper-plane"></i> Submit Lowongan</button>
+                <a href="/index.html" class="btn btn-outline btn-lg">Batal</a>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+
+      Components.renderLayout('post-job', 'Pasang Lowongan', content);
+    });
+
+    let selectedSkills = [];
+    function addSkill(skill) {
+      if (!skill || selectedSkills.includes(skill)) return;
+      selectedSkills.push(skill);
+      renderSkills();
+      document.getElementById('job-skills-select').value = '';
+    }
+    function removeSkill(skill) {
+      selectedSkills = selectedSkills.filter(s => s !== skill);
+      renderSkills();
+    }
+    function renderSkills() {
+      document.getElementById('skills-container').innerHTML = selectedSkills.map(s =>
+        `<span class="tag" style="cursor:pointer;" onclick="removeSkill('${s}')">${s} <i class="fas fa-times" style="margin-left:4px;font-size:0.6rem;"></i></span>`
+      ).join('');
+    }
+    function handlePostJob(e) {
+      e.preventDefault();
+      const user = Auth.getCurrentUser();
+      const job = {
+        companyId: user.id,
+        title: document.getElementById('job-title').value.trim(),
+        company: user.companyName || user.name,
+        location: document.getElementById('job-location').value,
+        category: document.getElementById('job-category').value,
+        type: document.getElementById('job-type').value,
+        salaryMin: parseInt(document.getElementById('job-salary-min').value) || 0,
+        salaryMax: parseInt(document.getElementById('job-salary-max').value) || 0,
+        education: document.getElementById('job-education').value,
+        experience: parseInt(document.getElementById('job-experience').value) || 0,
+        skills: selectedSkills,
+        description: document.getElementById('job-description').value.trim(),
+        requirements: document.getElementById('job-requirements').value.split('\n').filter(r => r.trim()),
+        benefits: document.getElementById('job-benefits').value.split('\n').filter(b => b.trim())
+      };
+      if (!job.title || !job.category || !job.location || !job.description) {
+        Components.showAlert('danger', 'Error', 'Silakan lengkapi semua field yang wajib diisi.');
+        return;
+      }
+      DB.createJob(job);
+      Components.showDialog({
+        type: 'success', title: 'Lowongan Berhasil Disubmit!',
+        text: 'Lowongan Anda akan diverifikasi oleh admin Disnaker sebelum dipublikasikan.',
+        confirmText: 'Kembali ke Dashboard',
+        onConfirm: () => { window.location.href = '/index.html'; }
+      });
+    }
+  </script>
+</body>
+</html>

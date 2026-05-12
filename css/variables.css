@@ -1,0 +1,186 @@
+/* ============================================
+   DISNAKER WEB - Design Tokens
+   Theme: "Civic Digital"
+   Institutional authority + modern digital clarity
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* ── Primary Palette (Deep Institutional Navy) ── */
+  --primary-50:  #E8EDF5;
+  --primary-100: #C5D1E8;
+  --primary-200: #9FB3D8;
+  --primary-300: #7895C8;
+  --primary-400: #5A7EBC;
+  --primary-500: #2E5FA3;
+  --primary-600: #1B3A6B;
+  --primary-700: #162F57;
+  --primary-800: #112443;
+  --primary-900: #0B1930;
+
+  /* ── Accent / Civic Orange ── */
+  --accent-50:  #FFF0E6;
+  --accent-100: #FFD9B8;
+  --accent-200: #FFC08A;
+  --accent-300: #FFA75C;
+  --accent-400: #FF9338;
+  --accent-500: #E8640A;
+  --accent-600: #C85508;
+  --accent-700: #A84707;
+  --accent-800: #883905;
+  --accent-900: #682B04;
+
+  /* ── Neutral / Gray ── */
+  --gray-50:  #F7F8FC;
+  --gray-100: #ECEEF5;
+  --gray-200: #DDE1ED;
+  --gray-300: #C8CDD9;
+  --gray-400: #A0A7B8;
+  --gray-500: #6B7080;
+  --gray-600: #555A68;
+  --gray-700: #3E4350;
+  --gray-800: #282C38;
+  --gray-900: #1A1D2E;
+
+  /* ── Semantic Colors ── */
+  --success-light: #E0F5EA;
+  --success:       #2D7A4F;
+  --success-dark:  #1F5C3A;
+
+  --warning-light: #FFF3D0;
+  --warning:       #D4930A;
+  --warning-dark:  #A57308;
+
+  --danger-light:  #FCE4E4;
+  --danger:        #C03030;
+  --danger-dark:   #8B2020;
+
+  --info-light:    #E0F0FF;
+  --info:          #2B7AC7;
+  --info-dark:     #1A5A9E;
+
+  /* ── Background ── */
+  --bg-body:       #F7F8FC;
+  --bg-sidebar:    #101527;
+  --bg-sidebar-hover: #1A2040;
+  --bg-card:       #FFFFFF;
+  --bg-input:      #F7F8FC;
+  --bg-overlay:    rgba(11, 25, 48, 0.6);
+
+  /* ── Text ── */
+  --text-primary:   #1A1D2E;
+  --text-secondary: #555A68;
+  --text-muted:     #A0A7B8;
+  --text-inverse:   #FFFFFF;
+  --text-link:      var(--primary-600);
+
+  /* ── Typography ── */
+  --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-size-xs:   0.75rem;
+  --font-size-sm:   0.8125rem;
+  --font-size-base: 0.9375rem;
+  --font-size-md:   1rem;
+  --font-size-lg:   1.125rem;
+  --font-size-xl:   1.25rem;
+  --font-size-2xl:  1.5rem;
+  --font-size-3xl:  1.875rem;
+  --font-size-4xl:  2.25rem;
+
+  --font-weight-light:    300;
+  --font-weight-regular:  400;
+  --font-weight-medium:   500;
+  --font-weight-semibold: 600;
+  --font-weight-bold:     700;
+  --font-weight-extrabold:700;
+
+  --line-height-tight:  1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed:1.75;
+
+  /* ── Spacing ── */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* ── Borders ── */
+  --radius-sm:   0.375rem;
+  --radius-md:   0.5rem;
+  --radius-lg:   0.75rem;
+  --radius-xl:   1rem;
+  --radius-2xl:  1.5rem;
+  --radius-full: 9999px;
+
+  --border-color: #DDE1ED;
+
+  /* ── Shadows ── */
+  --shadow-xs:  0 1px 2px rgba(27,58,107,0.04);
+  --shadow-sm:  0 1px 3px rgba(27,58,107,0.07), 0 1px 2px rgba(27,58,107,0.05);
+  --shadow-md:  0 4px 6px rgba(27,58,107,0.06), 0 2px 4px rgba(27,58,107,0.05);
+  --shadow-lg:  0 10px 20px rgba(27,58,107,0.08), 0 4px 6px rgba(27,58,107,0.04);
+  --shadow-xl:  0 20px 30px rgba(27,58,107,0.10), 0 10px 10px rgba(27,58,107,0.04);
+  --shadow-glow:0 0 24px rgba(27,58,107,0.18);
+  --shadow-accent: 0 4px 14px rgba(232,100,10,0.25);
+
+  /* ── Transitions ── */
+  --transition-fast:   150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow:   400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ── Layout ── */
+  --sidebar-width:     260px;
+  --sidebar-collapsed: 72px;
+  --navbar-height:     64px;
+  --content-max-width: 1400px;
+}
+
+/* ── Dark Mode ── */
+[data-theme="dark"] {
+  --bg-body:       #0C0F1A;
+  --bg-sidebar:    #080B14;
+  --bg-sidebar-hover: #141830;
+  --bg-card:       #141828;
+  --bg-input:      #1A1F34;
+  --bg-overlay:    rgba(0, 0, 0, 0.7);
+
+  --text-primary:   #E0E4EE;
+  --text-secondary: #8B90A0;
+  --text-muted:     #5A5F70;
+  --text-inverse:   #FFFFFF;
+  --text-link:      var(--primary-400);
+
+  --gray-50:  #1A1F34;
+  --gray-100: #202540;
+  --gray-200: #2A3050;
+  --gray-300: #3A4060;
+  --gray-400: #5A6080;
+  --gray-500: #7A80A0;
+  --gray-600: #9A9FB8;
+  --gray-700: #B8BDD0;
+  --gray-800: #D4D7E8;
+  --gray-900: #E8EAED;
+
+  --border-color: #252A40;
+  --shadow-xs:  0 1px 2px rgba(0,0,0,0.3);
+  --shadow-sm:  0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md:  0 4px 6px rgba(0,0,0,0.35), 0 2px 4px rgba(0,0,0,0.3);
+  --shadow-lg:  0 10px 15px rgba(0,0,0,0.4), 0 4px 6px rgba(0,0,0,0.3);
+  --shadow-xl:  0 20px 25px rgba(0,0,0,0.45), 0 10px 10px rgba(0,0,0,0.3);
+
+  --primary-50:  #141C30;
+  --primary-100: #1A2544;
+  --primary-200: #223460;
+  --success-light: #142820;
+  --warning-light: #2A2418;
+  --danger-light:  #2A1818;
+  --info-light:    #142030;
+  --accent-50: #2A1E14;
+}

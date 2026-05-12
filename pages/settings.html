@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <meta name="description" content="Pengaturan akun dan preferensi - Disnaker">
+  <title>Pengaturan - Disnaker</title>
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <div id="app"></div>
+
+  <script src="/js/utils.js"></script>
+  <script src="/data/seed.js"></script>
+  <script src="/js/database.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/settings.js"></script>
+  <script src="/js/components.js"></script>
+  <script src="/js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!Auth.requireAuth()) return;
+      const user = Auth.getCurrentUser();
+      const settings = Settings.getAll();
+
+      const content = `
+        <div class="page-header">
+          <h1><i class="fas fa-cog" style="color:var(--primary-500);margin-right:var(--space-3)"></i> Pengaturan</h1>
+          <p>Atur preferensi tampilan, notifikasi, dan keamanan akun Anda</p>
+        </div>
+
+        <div class="settings-layout">
+          <!-- Sidebar Navigation -->
+          <div class="settings-nav">
+            <button class="settings-nav-btn active" onclick="switchTab('appearance', this)">
+              <i class="fas fa-palette"></i> <span>Tampilan</span>
+            </button>
+            <button class="settings-nav-btn" onclick="switchTab('notifications', this)">
+              <i class="fas fa-bell"></i> <span>Notifikasi</span>
+            </button>
+            <button class="settings-nav-btn" onclick="switchTab('security', this)">
+              <i class="fas fa-shield-alt"></i> <span>Keamanan</span>
+            </button>
+            <button class="settings-nav-btn" onclick="switchTab('data', this)">
+              <i class="fas fa-database"></i> <span>Data & Privasi</span>
+            </button>
+          </div>
+
+          <!-- Settings Content -->
+          <div class="settings-content">
+
+            <!-- ═══ TAB: Appearance ═══ -->
+            <div class="settings-tab active" id="tab-appearance">
+              <div class="settings-section">
+                <div class="settings-section-header">
+                  <div>
+                    <h2><i class="fas fa-palette"></i> Tampilan</h2>
+                    <p>Sesuaikan tema dan ukuran tampilan</p>
+                  </div>
+                </div>
+
+                <!-- Theme -->
+                <div class="settings-item">
+                  <div class="settings-item-info">
+                    <div class="settings-item-icon theme-icon">
+                      <i class="fas ${settings.theme === 'dark' ? 'fa-moon' : 'fa-sun'}"></i>
+                    </div>
+                    <div>
+                      <h4>Tema</h4>
+                      <p>Pilih tema terang atau gelap untuk tampilan</p>
+                    </div>
+                  </div>
+                  <div class="theme-switcher" id="theme-switcher">
+                    <button class="theme-option ${settings.theme === 'light' ? 'active' : ''}" onclick="setTheme('light')" title="Mode Terang">
+                      <i class="fas fa-sun"></i>
+                      <span>Terang</span>
+                    </button>
+                    <button class="theme-option ${settings.theme === 'dark' ? 'active' : ''}" onclick="setTheme('dark')" title="Mode Gelap">
+                      <i class="fas fa-moon"></i>
+                      <span>Gelap</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Font Size -->
+                <div class="settings-item">
+                  <div class="settings-item-info">
+                    <div class="settings-item-icon font-icon">
+                      <i class="fas fa-text-height"></i>
+                    </div>
+                    <div>
+                      <h4>Ukuran Font</h4>
+                      <p>Sesuaikan ukuran teks untuk kenyamanan membaca</p>
+                    </div>
+                  </div>
+                  <div class="font-size-selector" id="font-size-selector">
+                    <button class="font-size-option ${settings.fontSize === 'small' ? 'active' : ''}" onclick="setFontSize('small')">
+                      <span style="font-size:12px">A</span>
+                      <span>Kecil</span>
+                    </button>
+                    <button class="font-size-option ${settings.fontSize === 'normal' ? 'active' : ''}" onclick="setFontSize('normal')">
+                      <span style="font-size:15px">A</span>
+                      <span>Normal</span>
+                    </button>
+                    <button class="font-size-option ${settings.fontSize === 'large' ? 'active' : ''}" onclick="setFontSize('large')">
+                      <span style="font-size:19px">A</span>
+                      <span>Besar</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Compact Sidebar -->
+                <div class="settings-item">
+                  <div class="settings-item-info">
+                    <div class="settings-item-icon sidebar-icon">
+                      <i class="fas fa-columns"></i>
+                    </div>
+                    <div>
+                      <h4>Sidebar Compact</h4>
+                      <p>Tampilkan sidebar dalam mode ringkas</p>
+                    </div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" id="toggle-sidebar-compact" ${settings.sidebarCompact ? 'checked' : ''} onchange="toggleSetting('sidebarCompact', this.checked)">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Preview -->
+              <div class="settings-section">
+                <div class="settings-section-header">
+                  <div>
+                    <h2><i class="fas fa-eye"></i> Pratinjau</h2>
+                    <p>Lihat perubahan tampilan secara langsung</p>
+                  </div>
+                </div>
+                <div class="settings-preview" id="settings-preview">
+                  <div class="preview-card">
+                    <div class="preview-header">
+                      <div class="preview-avatar"><i class="fas fa-briefcase"></i></div>
+                      <div>
+                        <div class="preview-title">Software Engineer</div>
+                        <div class="preview-subtitle">PT Teknologi Nusantara</div>
+                      </div>
+                    </div>
+                    <div class="preview-body">
+                      <p>Contoh tampilan kartu lowongan kerja dengan pengaturan saat ini.</p>
+                      <div class="preview-tags">
+                        <span class="tag">JavaScript</span>
+                        <span class="tag">React</span>
+                        <span class="tag">Node.js</span>
+                      </div>
+                    </div>
+                    <div class="preview-footer">
+                      <span class="preview-salary">Rp 8.000.000 - Rp 15.000.000</span>
+                      <span class="preview-date">2 hari lalu</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ═══ TAB: Notifications ═══ -->
+            <div class="settings-tab" id="tab-notifications">
+              <div class="settings-section">
+                <div class="settings-section-header">
+                  <div>
+                    <h2><i class="fas fa-bell"></i> Preferensi Notifikasi</h2>
+                    <p>Kelola jenis notifikasi yang ingin Anda terima</p>
+                  </div>
+                </div>
+
+                <div class="settings-item">
+                  <div class="settings-item-info">
+                    <div class="settings-item-icon notif-icon" style="background:var(--primary-50);color:var(--primary-600)">
+                      <i class="fas fa-briefcase"></i>
+                    </div>
+                    <div>
+                      <h4>Lowongan Baru</h4>
+                      <p>Dapatkan notifikasi saat ada lowongan baru yang sesuai profil Anda</p>
+                    </div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" ${settings.notifJobNew ? 'checked' : ''} onchange="toggleSetting('notifJobNew', this.checked)">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+
+                <div class="settings-item">
+                  <div class="settings-item-info">
+                    <div class="settings-item-icon notif-icon" style="background:var(--accent-50);color:var(--accent-700)">
+                      <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div>
+                      <h4>Status Lowongan</h4>
+                      <p>Notifikasi perubahan status verifikasi lowongan kerja</p>
+                    </div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" ${settings.notifJobStatus ? 'checked' : ''} onchange="toggleSetting('notifJobStatus', this.checked)">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+
+                <div class="settings-item">
+                  <div class="settings-item-info">
+                    <div class="settings-item-icon notif-icon" style="background:var(--warning-light);color:var(--warning-dark)">
+                      <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div>
+                      <h4>Lamaran</h4>
+                      <p>Notifikasi update status lamaran kerja Anda</p>
+                    </div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" ${settings.notifApplication ? 'checked' : ''} onchange="toggleSetting('notifApplication', this.checked)">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+
+                <div class="settings-item">
+                  <div class="settings-item-info">
+                    <div class="settings-item-icon notif-icon" style="background:var(--info-light);color:var(--info-dark)">
+                      <i class="fas fa-envelope"></i>
+                    </div>
+                    <div>
+                      <h4>Notifikasi Email</h4>
+                      <p>Kirim salinan notifikasi ke email terdaftar</p>
+                    </div>
+                  </div>
+                  <label class="toggle-switch">
+                    <input type="checkbox" ${settings.notifEmail ? 'checked' : ''} onchange="toggleSetting('notifEmail', this.checked)">
+                    <span class="toggle-slider"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- ═══ TAB: Security ═══ -->
+            <div class="settings-tab" id="tab-security">
+              <div class="settings-section">
+                <div class="settings-section-header">
+                  <div>
+                    <h2><i class="fas fa-lock"></i> Ganti Password</h2>
+                    <p>Perbarui kata sandi untuk menjaga keamanan akun</p>
+                  </div>
+                </div>
+
+                <form id="password-form" onsubmit="handleChangePassword(event)">
+                  <div class="form-group">
+                    <label class="form-label">Password Saat Ini <span class="required">*</span></label>
+                    <div class="input-icon-wrapper">
+                      <i class="fas fa-lock input-icon-left"></i>
+                      <input type="password" id="pw-current" class="form-control form-control-icon" placeholder="Masukkan password saat ini" required>
+                      <button type="button" class="input-icon-right" onclick="togglePwVisibility('pw-current', this)"><i class="fas fa-eye"></i></button>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Password Baru <span class="required">*</span></label>
+                    <div class="input-icon-wrapper">
+                      <i class="fas fa-key input-icon-left"></i>
+                      <input type="password" id="pw-new" class="form-control form-control-icon" placeholder="Minimal 6 karakter" required minlength="6" oninput="checkPwStrength(this.value)">
+                      <button type="button" class="input-icon-right" onclick="togglePwVisibility('pw-new', this)"><i class="fas fa-eye"></i></button>
+                    </div>
+                    <div class="pw-strength" id="pw-strength">
+                      <div class="pw-strength-bar"><div class="pw-strength-fill" id="pw-strength-fill"></div></div>
+                      <span class="pw-strength-text" id="pw-strength-text"></span>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Konfirmasi Password Baru <span class="required">*</span></label>
+                    <div class="input-icon-wrapper">
+                      <i class="fas fa-check-double input-icon-left"></i>
+                      <input type="password" id="pw-confirm" class="form-control form-control-icon" placeholder="Ulangi password baru" required minlength="6">
+                      <button type="button" class="input-icon-right" onclick="togglePwVisibility('pw-confirm', this)"><i class="fas fa-eye"></i></button>
+                    </div>
+                  </div>
+                  <button type="submit" class="btn btn-primary" id="btn-change-pw">
+                    <i class="fas fa-save"></i> Simpan Password Baru
+                  </button>
+                </form>
+              </div>
+
+              <div class="settings-section">
+                <div class="settings-section-header">
+                  <div>
+                    <h2><i class="fas fa-info-circle"></i> Informasi Sesi</h2>
+                    <p>Detail sesi login Anda saat ini</p>
+                  </div>
+                </div>
+                <div class="session-info">
+                  <div class="session-item">
+                    <i class="fas fa-user"></i>
+                    <div><strong>Nama</strong><span>${Utils.escapeHtml(user.name)}</span></div>
+                  </div>
+                  <div class="session-item">
+                    <i class="fas fa-envelope"></i>
+                    <div><strong>Email</strong><span>${Utils.escapeHtml(user.email)}</span></div>
+                  </div>
+                  <div class="session-item">
+                    <i class="fas fa-user-tag"></i>
+                    <div><strong>Role</strong><span class="badge badge-primary" style="text-transform:capitalize">${user.role}</span></div>
+                  </div>
+                  <div class="session-item">
+                    <i class="fas fa-clock"></i>
+                    <div><strong>Bergabung Sejak</strong><span>${Utils.formatDate(user.createdAt)}</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ═══ TAB: Data & Privacy ═══ -->
+            <div class="settings-tab" id="tab-data">
+              <div class="settings-section">
+                <div class="settings-section-header">
+                  <div>
+                    <h2><i class="fas fa-download"></i> Ekspor Data</h2>
+                    <p>Unduh salinan data akun Anda</p>
+                  </div>
+                </div>
+                <div class="settings-item" style="border-bottom:none">
+                  <div class="settings-item-info">
+                    <div class="settings-item-icon" style="background:var(--primary-50);color:var(--primary-600)">
+                      <i class="fas fa-file-export"></i>
+                    </div>
+                    <div>
+                      <h4>Unduh Data Pribadi</h4>
+                      <p>Ekspor profil, lamaran, dan notifikasi dalam format JSON</p>
+                    </div>
+                  </div>
+                  <button class="btn btn-outline" onclick="Settings.exportUserData('${user.id}'); Components.showAlert('success','Ekspor Data','File berhasil diunduh.');">
+                    <i class="fas fa-download"></i> Unduh
+                  </button>
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <div class="settings-section-header">
+                  <div>
+                    <h2><i class="fas fa-redo"></i> Reset Pengaturan</h2>
+                    <p>Kembalikan semua pengaturan ke default</p>
+                  </div>
+                </div>
+                <div class="settings-item" style="border-bottom:none">
+                  <div class="settings-item-info">
+                    <div class="settings-item-icon" style="background:var(--warning-light);color:var(--warning-dark)">
+                      <i class="fas fa-undo"></i>
+                    </div>
+                    <div>
+                      <h4>Reset ke Default</h4>
+                      <p>Kembalikan tema, ukuran font, dan preferensi notifikasi ke pengaturan awal</p>
+                    </div>
+                  </div>
+                  <button class="btn btn-outline" onclick="handleReset()">
+                    <i class="fas fa-redo"></i> Reset
+                  </button>
+                </div>
+              </div>
+
+              <div class="settings-section settings-danger-zone">
+                <div class="settings-section-header">
+                  <div>
+                    <h2><i class="fas fa-exclamation-triangle"></i> Zona Berbahaya</h2>
+                    <p>Tindakan ini tidak dapat dibatalkan</p>
+                  </div>
+                </div>
+                <div class="settings-item" style="border-bottom:none">
+                  <div class="settings-item-info">
+                    <div class="settings-item-icon" style="background:var(--danger-light);color:var(--danger-dark)">
+                      <i class="fas fa-trash-alt"></i>
+                    </div>
+                    <div>
+                      <h4>Hapus Akun</h4>
+                      <p>Hapus akun secara permanen beserta semua data Anda</p>
+                    </div>
+                  </div>
+                  <button class="btn btn-danger" onclick="handleDeleteAccount()">
+                    <i class="fas fa-trash"></i> Hapus Akun
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      `;
+
+      Components.renderLayout('settings', 'Pengaturan', content);
+    });
+
+    // ── Tab Switching ─────────────────────────
+    function switchTab(tabName, btnEl) {
+      document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.settings-nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + tabName).classList.add('active');
+      btnEl.classList.add('active');
+    }
+
+    // ── Theme ─────────────────────────────────
+    function setTheme(theme) {
+      Settings.save({ theme });
+      Settings.applyTheme(theme);
+      document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      // Update icon
+      const iconEl = document.querySelector('.theme-icon i');
+      if (iconEl) iconEl.className = 'fas ' + (theme === 'dark' ? 'fa-moon' : 'fa-sun');
+      Components.showAlert('success', 'Tema Diubah', theme === 'dark' ? 'Mode gelap diaktifkan' : 'Mode terang diaktifkan');
+    }
+
+    // ── Font Size ─────────────────────────────
+    function setFontSize(size) {
+      Settings.save({ fontSize: size });
+      Settings.applyFontSize(size);
+      document.querySelectorAll('.font-size-option').forEach(o => o.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      Components.showAlert('success', 'Font Diubah', `Ukuran font diatur ke "${size}"`);
+    }
+
+    // ── Toggle Setting ────────────────────────
+    function toggleSetting(key, value) {
+      Settings.save({ [key]: value });
+      Components.showAlert('info', 'Pengaturan Disimpan', `Preferensi berhasil diperbarui`);
+    }
+
+    // ── Password ──────────────────────────────
+    function togglePwVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      const icon = btn.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+      } else {
+        input.type = 'password';
+        icon.className = 'fas fa-eye';
+      }
+    }
+
+    function checkPwStrength(pw) {
+      let score = 0;
+      if (pw.length >= 6) score++;
+      if (pw.length >= 10) score++;
+      if (/[A-Z]/.test(pw)) score++;
+      if (/[0-9]/.test(pw)) score++;
+      if (/[^a-zA-Z0-9]/.test(pw)) score++;
+
+      const fill = document.getElementById('pw-strength-fill');
+      const text = document.getElementById('pw-strength-text');
+      const levels = [
+        { label: '', color: 'transparent', width: '0%' },
+        { label: 'Sangat Lemah', color: 'var(--danger)', width: '20%' },
+        { label: 'Lemah', color: '#ff6b35', width: '40%' },
+        { label: 'Cukup', color: 'var(--warning)', width: '60%' },
+        { label: 'Kuat', color: '#82c91e', width: '80%' },
+        { label: 'Sangat Kuat', color: 'var(--success)', width: '100%' },
+      ];
+      const level = pw.length === 0 ? levels[0] : levels[Math.min(score, 5)];
+      fill.style.width = level.width;
+      fill.style.background = level.color;
+      text.textContent = level.label;
+      text.style.color = level.color;
+    }
+
+    function handleChangePassword(e) {
+      e.preventDefault();
+      const user = Auth.getCurrentUser();
+      const current = document.getElementById('pw-current').value;
+      const newPw = document.getElementById('pw-new').value;
+      const confirm = document.getElementById('pw-confirm').value;
+
+      if (newPw !== confirm) {
+        Components.showAlert('danger', 'Error', 'Konfirmasi password tidak cocok.');
+        return;
+      }
+
+      const result = Settings.changePassword(user.id, current, newPw);
+      if (result.success) {
+        Components.showAlert('success', 'Berhasil', result.message);
+        document.getElementById('password-form').reset();
+        document.getElementById('pw-strength-fill').style.width = '0%';
+        document.getElementById('pw-strength-text').textContent = '';
+      } else {
+        Components.showAlert('danger', 'Gagal', result.message);
+      }
+    }
+
+    // ── Reset ─────────────────────────────────
+    function handleReset() {
+      Components.showDialog({
+        type: 'warning',
+        title: 'Reset Pengaturan?',
+        text: 'Semua pengaturan akan dikembalikan ke default. Tindakan ini tidak mempengaruhi data akun Anda.',
+        confirmText: 'Ya, Reset',
+        cancelText: 'Batal',
+        onConfirm: () => {
+          Settings.reset();
+          Components.showAlert('success', 'Berhasil', 'Pengaturan telah direset ke default.');
+          setTimeout(() => location.reload(), 800);
+        }
+      });
+    }
+
+    // ── Delete Account ────────────────────────
+    function handleDeleteAccount() {
+      const user = Auth.getCurrentUser();
+      Components.showDialog({
+        type: 'danger',
+        title: 'Hapus Akun?',
+        text: `Anda yakin ingin menghapus akun "${Utils.escapeHtml(user.name)}"? Semua data termasuk lamaran dan notifikasi akan dihapus permanen.`,
+        confirmText: 'Ya, Hapus',
+        cancelText: 'Batal',
+        onConfirm: () => {
+          Settings.deleteAccount(user.id);
+        }
+      });
+    }
+  </script>
+</body>
+</html>

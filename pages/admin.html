@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <title>Admin Panel - Disnaker</title>
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div id="app"></div>
+  <script src="/js/utils.js"></script>
+  <script src="/data/seed.js"></script>
+  <script src="/js/database.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/settings.js"></script>
+  <script src="/js/components.js"></script>
+  <script src="/js/verification.js"></script>
+  <script src="/js/search.js"></script>
+  <script src="/js/charts.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!Auth.requireAuth(['admin'])) return;
+      const stats = DB.getStats();
+      const vStats = Verification.getVerificationStats();
+      const users = DB.getUsers();
+      const allJobs = DB.getJobs();
+
+      const content = `
+        <div class="page-header">
+          <h1><i class="fas fa-shield-alt" style="color:var(--primary-500);margin-right:var(--space-3)"></i> Admin Panel</h1>
+          <p>Kelola sistem informasi lowongan kerja terpadu</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon"><i class="fas fa-briefcase"></i></div><div class="stat-info"><h3>${stats.totalJobs}</h3><p>Total Lowongan</p></div></div>
+          <div class="stat-card"><div class="stat-icon"><i class="fas fa-check-double"></i></div><div class="stat-info"><h3>${vStats.rate}%</h3><p>Tingkat Verifikasi</p></div></div>
+          <div class="stat-card"><div class="stat-icon"><i class="fas fa-clock"></i></div><div class="stat-info"><h3>${vStats.pending}</h3><p>Menunggu Verifikasi</p></div></div>
+          <div class="stat-card"><div class="stat-icon"><i class="fas fa-users"></i></div><div class="stat-info"><h3>${users.length}</h3><p>Total Pengguna</p></div></div>
+        </div>
+
+        ${vStats.pending > 0 ? `
+          <div class="card mb-6" style="border-color:var(--warning);">
+            <div class="card-body" style="display:flex;align-items:center;justify-content:space-between;">
+              <div style="display:flex;align-items:center;gap:var(--space-3);">
+                <div style="width:40px;height:40px;border-radius:var(--radius-full);background:var(--warning-light);display:flex;align-items:center;justify-content:center;color:var(--warning-dark);"><i class="fas fa-exclamation-triangle"></i></div>
+                <div><strong>${vStats.pending} lowongan</strong> menunggu verifikasi</div>
+              </div>
+              <a href="/pages/admin-verification.html" class="btn btn-primary btn-sm"><i class="fas fa-check-double"></i> Verifikasi Sekarang</a>
+            </div>
+          </div>
+        ` : ''}
+
+        <div class="charts-grid">
+          <div class="chart-card">
+            <h3><i class="fas fa-chart-pie" style="color:var(--primary-500);margin-right:var(--space-2)"></i> Lowongan per Kategori</h3>
+            <div style="height:280px"><canvas id="admin-chart-category"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3><i class="fas fa-chart-bar" style="color:var(--accent-500);margin-right:var(--space-2)"></i> Status Verifikasi</h3>
+            <div style="height:280px"><canvas id="admin-chart-status"></canvas></div>
+          </div>
+        </div>
+
+        <div class="card mb-6">
+          <div class="card-header"><h3><i class="fas fa-users" style="margin-right:var(--space-2);color:var(--primary-500);"></i> Daftar Pengguna</h3></div>
+          <div class="card-body" style="padding:0;">
+            <div class="table-container" style="border:none;border-radius:0;">
+              <table class="table">
+                <thead><tr><th>Nama</th><th>Email</th><th>Role</th><th>Terdaftar</th></tr></thead>
+                <tbody>
+                  ${users.map(u => `<tr>
+                    <td><div style="display:flex;align-items:center;gap:var(--space-3);">
+                      <div style="width:32px;height:32px;border-radius:var(--radius-full);background:linear-gradient(135deg,var(--primary-100),var(--accent-100));display:flex;align-items:center;justify-content:center;font-size:var(--font-size-xs);font-weight:var(--font-weight-bold);color:var(--primary-600);flex-shrink:0;">${Utils.getInitials(u.name)}</div>
+                      <strong>${Utils.escapeHtml(u.name)}</strong>
+                    </div></td>
+                    <td>${Utils.escapeHtml(u.email)}</td>
+                    <td><span class="badge ${u.role === 'admin' ? 'badge-danger' : u.role === 'company' ? 'badge-success' : 'badge-primary'}">${u.role}</span></td>
+                    <td>${Utils.formatDateShort(u.createdAt)}</td>
+                  </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><h3><i class="fas fa-briefcase" style="margin-right:var(--space-2);color:var(--primary-500);"></i> Semua Lowongan</h3></div>
+          <div class="card-body" style="padding:0;">
+            <div class="table-container" style="border:none;border-radius:0;">
+              <table class="table">
+                <thead><tr><th>Posisi</th><th>Perusahaan</th><th>Lokasi</th><th>Kategori</th><th>Status</th><th>Tanggal</th></tr></thead>
+                <tbody>
+                  ${allJobs.map(j => `<tr>
+                    <td><a href="/pages/job-detail.html?id=${j.id}" style="font-weight:var(--font-weight-semibold);">${Utils.escapeHtml(j.title)}</a></td>
+                    <td>${Utils.escapeHtml(j.company)}</td>
+                    <td>${Utils.escapeHtml(j.location)}</td>
+                    <td><span class="tag">${Utils.escapeHtml(j.category)}</span></td>
+                    <td><span class="verified-badge ${j.status}">${j.status === 'verified' ? '<i class="fas fa-check-circle"></i> Verified' : j.status === 'pending' ? '<i class="fas fa-clock"></i> Pending' : '<i class="fas fa-times-circle"></i> Rejected'}</span></td>
+                    <td>${Utils.formatDateShort(j.createdAt)}</td>
+                  </tr>`).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="card mt-6">
+          <div class="card-header"><h3><i class="fas fa-database" style="margin-right:var(--space-2);color:var(--warning-dark);"></i> Database Management</h3></div>
+          <div class="card-body">
+            <p style="font-size:var(--font-size-sm);color:var(--text-secondary);margin-bottom:var(--space-4);">Reset database akan menghapus semua data dan mengembalikan ke data awal (seed data).</p>
+            <button class="btn btn-danger btn-sm" onclick="resetDatabase()"><i class="fas fa-undo"></i> Reset Database</button>
+          </div>
+        </div>
+      `;
+
+      Components.renderLayout('admin', 'Admin Panel', content);
+      setTimeout(() => {
+        Charts.renderJobsByCategory('admin-chart-category');
+        Charts.renderJobsByStatus('admin-chart-status');
+      }, 100);
+    });
+
+    function resetDatabase() {
+      Components.showDialog({
+        type: 'danger', title: 'Reset Database?',
+        text: 'Semua data akan dihapus dan dikembalikan ke data awal. Tindakan ini tidak dapat dibatalkan.',
+        confirmText: 'Ya, Reset', cancelText: 'Batal',
+        onConfirm: () => {
+          DB.reset();
+          Components.showAlert('success', 'Berhasil', 'Database telah direset.');
+          setTimeout(() => location.reload(), 1500);
+        }
+      });
+    }
+  </script>
+</body>
+</html>

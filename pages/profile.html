@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <title>Profil - Disnaker</title>
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <div id="app"></div>
+  <script src="/js/utils.js"></script>
+  <script src="/data/seed.js"></script>
+  <script src="/js/database.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/settings.js"></script>
+  <script src="/js/components.js"></script>
+  <script src="/js/verification.js"></script>
+  <script src="/js/search.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!Auth.requireAuth()) return;
+      const user = Auth.getCurrentUser();
+      let selectedSkills = [...(user.skills || [])];
+
+      function render() {
+        const initials = Utils.getInitials(user.name);
+        const isUser = user.role === 'user';
+        const isCompany = user.role === 'company';
+
+        const profileFields = isUser ? `
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Pendidikan Terakhir</label>
+              <select class="form-control" id="prof-education">
+                <option value="">Pilih</option>
+                ${Utils.educationLevels.map(e => `<option value="${e}" ${user.education === e ? 'selected' : ''}>${e}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Pengalaman (tahun)</label>
+              <input type="number" id="prof-experience" class="form-control" value="${user.experience || 0}" min="0">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Preferensi Gaji (Rp/bulan)</label>
+            <input type="number" id="prof-salary" class="form-control" value="${user.salaryPreference || ''}" min="0" step="500000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Keahlian</label>
+            <div id="skills-container" style="display:flex;flex-wrap:wrap;gap:var(--space-2);margin-bottom:var(--space-2);"></div>
+            <select class="form-control" id="prof-skills-select" onchange="addSkill(this.value)">
+              <option value="">+ Tambah keahlian</option>
+              ${Utils.skills.map(s => `<option value="${s}">${s}</option>`).join('')}
+            </select>
+          </div>
+        ` : '';
+
+        const companyFields = isCompany ? `
+          <div class="form-group">
+            <label class="form-label">Nama Perusahaan</label>
+            <input type="text" id="prof-company-name" class="form-control" value="${Utils.escapeHtml(user.companyName || '')}">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Industri</label>
+              <select class="form-control" id="prof-company-industry">
+                ${Utils.categories.map(c => `<option value="${c}" ${user.companyIndustry === c ? 'selected' : ''}>${c}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Alamat</label>
+              <input type="text" id="prof-company-address" class="form-control" value="${Utils.escapeHtml(user.companyAddress || '')}">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Deskripsi Perusahaan</label>
+            <textarea class="form-control" id="prof-company-desc" rows="3">${Utils.escapeHtml(user.companyDescription || '')}</textarea>
+          </div>
+        ` : '';
+
+        const content = `
+          <div class="profile-header">
+            <div class="profile-avatar">${initials}</div>
+            <div class="profile-info">
+              <h2>${Utils.escapeHtml(user.name)}</h2>
+              <p><i class="fas fa-envelope" style="margin-right:var(--space-2);"></i>${Utils.escapeHtml(user.email)}</p>
+              <p style="margin-top:var(--space-1);"><span class="badge badge-primary" style="background:rgba(255,255,255,0.2);color:white;">${user.role === 'user' ? 'Pencari Kerja' : user.role === 'company' ? 'Perusahaan' : 'Admin'}</span></p>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3><i class="fas fa-edit" style="margin-right:var(--space-2);color:var(--primary-500);"></i>Edit Profil</h3></div>
+            <div class="card-body" style="max-width:700px;">
+              <form onsubmit="saveProfile(event)">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Nama Lengkap</label>
+                    <input type="text" id="prof-name" class="form-control" value="${Utils.escapeHtml(user.name)}">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">No. Telepon</label>
+                    <input type="tel" id="prof-phone" class="form-control" value="${Utils.escapeHtml(user.phone || '')}">
+                  </div>
+                </div>
+                ${profileFields}
+                ${companyFields}
+                <button type="submit" class="btn btn-primary btn-lg mt-6"><i class="fas fa-save"></i> Simpan Perubahan</button>
+              </form>
+            </div>
+          </div>
+        `;
+
+        Components.renderLayout('profile', 'Profil', content);
+        renderSkills();
+      }
+
+      window.addSkill = function(skill) {
+        if (!skill || selectedSkills.includes(skill)) return;
+        selectedSkills.push(skill);
+        renderSkills();
+        const sel = document.getElementById('prof-skills-select');
+        if (sel) sel.value = '';
+      };
+      window.removeSkill = function(skill) {
+        selectedSkills = selectedSkills.filter(s => s !== skill);
+        renderSkills();
+      };
+      function renderSkills() {
+        const container = document.getElementById('skills-container');
+        if (container) {
+          container.innerHTML = selectedSkills.map(s =>
+            `<span class="tag" style="cursor:pointer;" onclick="removeSkill('${s}')">${s} <i class="fas fa-times" style="margin-left:4px;font-size:0.6rem;"></i></span>`
+          ).join('');
+        }
+      }
+      window.saveProfile = function(e) {
+        e.preventDefault();
+        const data = { name: document.getElementById('prof-name').value.trim(), phone: document.getElementById('prof-phone')?.value.trim() || '' };
+        if (user.role === 'user') {
+          data.education = document.getElementById('prof-education')?.value || '';
+          data.experience = parseInt(document.getElementById('prof-experience')?.value) || 0;
+          data.salaryPreference = parseInt(document.getElementById('prof-salary')?.value) || 0;
+          data.skills = selectedSkills;
+        }
+        if (user.role === 'company') {
+          data.companyName = document.getElementById('prof-company-name')?.value.trim() || '';
+          data.companyIndustry = document.getElementById('prof-company-industry')?.value || '';
+          data.companyAddress = document.getElementById('prof-company-address')?.value.trim() || '';
+          data.companyDescription = document.getElementById('prof-company-desc')?.value.trim() || '';
+        }
+        DB.updateUser(user.id, data);
+        Components.showAlert('success', 'Berhasil', 'Profil berhasil diperbarui.');
+      };
+      render();
+    });
+  </script>
+</body>
+</html>

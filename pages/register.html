@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <title>Daftar - Disnaker</title>
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="auth-left">
+      <div class="auth-brand">
+        <img src="/assets/logo.svg" alt="Disnakerja" class="auth-brand-logo">
+        <p>Bergabunglah dengan platform lowongan kerja terpercaya di Indonesia</p>
+      </div>
+      <div class="auth-features">
+        <div class="auth-feature"><i class="fas fa-user-check"></i><span>Daftar Gratis</span></div>
+        <div class="auth-feature"><i class="fas fa-shield-alt"></i><span>Lowongan Terverifikasi</span></div>
+        <div class="auth-feature"><i class="fas fa-magic"></i><span>Rekomendasi Pekerjaan Pintar</span></div>
+      </div>
+    </div>
+
+    <div class="auth-right">
+      <div class="auth-form-container" style="max-width:520px">
+        <h2>Daftar Akun</h2>
+        <p class="auth-subtitle">Pilih tipe akun dan isi data Anda</p>
+
+        <div class="role-selector">
+          <div class="role-option active" onclick="selectRole('user', this)">
+            <i class="fas fa-user"></i>
+            <div class="role-name">Pencari Kerja</div>
+            <div class="role-desc">Cari & lamar pekerjaan</div>
+          </div>
+          <div class="role-option" onclick="selectRole('company', this)">
+            <i class="fas fa-building"></i>
+            <div class="role-name">Perusahaan</div>
+            <div class="role-desc">Pasang lowongan</div>
+          </div>
+        </div>
+
+        <form id="register-form" onsubmit="handleRegister(event)">
+          <input type="hidden" id="reg-role" value="user">
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Nama Lengkap <span class="required">*</span></label>
+              <input type="text" id="reg-name" class="form-control" placeholder="Nama lengkap" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email <span class="required">*</span></label>
+              <input type="email" id="reg-email" class="form-control" placeholder="contoh@email.com" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Password <span class="required">*</span></label>
+              <input type="password" id="reg-password" class="form-control" placeholder="Min 6 karakter" required minlength="6">
+            </div>
+            <div class="form-group">
+              <label class="form-label">No. Telepon</label>
+              <input type="tel" id="reg-phone" class="form-control" placeholder="08xxxxxxxxxx">
+            </div>
+          </div>
+
+          <!-- Company-specific fields -->
+          <div id="company-fields" style="display:none;">
+            <div class="form-group">
+              <label class="form-label">Nama Perusahaan <span class="required">*</span></label>
+              <input type="text" id="reg-company-name" class="form-control" placeholder="PT / CV / ...">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Industri</label>
+                <select class="form-control" id="reg-company-industry">
+                  <option value="">Pilih industri</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Alamat</label>
+                <input type="text" id="reg-company-address" class="form-control" placeholder="Alamat perusahaan">
+              </div>
+            </div>
+          </div>
+
+          <!-- User-specific fields -->
+          <div id="user-fields">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Pendidikan Terakhir</label>
+                <select class="form-control" id="reg-education">
+                  <option value="">Pilih</option>
+                  <option value="SMA/SMK">SMA/SMK</option>
+                  <option value="D3">D3</option>
+                  <option value="S1">S1</option>
+                  <option value="S2">S2</option>
+                  <option value="S3">S3</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Pengalaman (tahun)</label>
+                <input type="number" id="reg-experience" class="form-control" placeholder="0" min="0" max="50">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Preferensi Gaji (Rp/bulan)</label>
+              <input type="number" id="reg-salary" class="form-control" placeholder="5000000" min="0" step="500000">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Keahlian</label>
+              <div id="skills-container" style="display:flex;flex-wrap:wrap;gap:var(--space-2);margin-bottom:var(--space-2);"></div>
+              <select class="form-control" id="reg-skills-select" onchange="addSkill(this.value)">
+                <option value="">+ Tambah keahlian</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg btn-block" style="margin-top:var(--space-4)">
+            <i class="fas fa-user-plus"></i> Daftar
+          </button>
+        </form>
+
+        <div class="auth-footer">
+          Sudah punya akun? <a href="/pages/login.html">Masuk</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/utils.js"></script>
+  <script src="/data/seed.js"></script>
+  <script src="/js/database.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/settings.js"></script>
+  <script src="/js/components.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    if (Auth.isLoggedIn()) window.location.href = '/index.html';
+
+    let selectedSkills = [];
+
+    // Populate selects
+    const industrySelect = document.getElementById('reg-company-industry');
+    Utils.categories.forEach(c => { industrySelect.innerHTML += `<option value="${c}">${c}</option>`; });
+    const skillsSelect = document.getElementById('reg-skills-select');
+    Utils.skills.forEach(s => { skillsSelect.innerHTML += `<option value="${s}">${s}</option>`; });
+
+    function selectRole(role, el) {
+      document.querySelectorAll('.role-option').forEach(o => o.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('reg-role').value = role;
+      document.getElementById('company-fields').style.display = role === 'company' ? 'block' : 'none';
+      document.getElementById('user-fields').style.display = role === 'user' ? 'block' : 'none';
+    }
+
+    function addSkill(skill) {
+      if (!skill || selectedSkills.includes(skill)) return;
+      selectedSkills.push(skill);
+      renderSkills();
+      document.getElementById('reg-skills-select').value = '';
+    }
+
+    function removeSkill(skill) {
+      selectedSkills = selectedSkills.filter(s => s !== skill);
+      renderSkills();
+    }
+
+    function renderSkills() {
+      document.getElementById('skills-container').innerHTML = selectedSkills.map(s =>
+        `<span class="tag" style="cursor:pointer;" onclick="removeSkill('${s}')">${s} <i class="fas fa-times" style="margin-left:4px;font-size:0.6rem;"></i></span>`
+      ).join('');
+    }
+
+    function handleRegister(e) {
+      e.preventDefault();
+      const role = document.getElementById('reg-role').value;
+      const data = {
+        name: document.getElementById('reg-name').value.trim(),
+        email: document.getElementById('reg-email').value.trim(),
+        password: document.getElementById('reg-password').value,
+        phone: document.getElementById('reg-phone').value.trim(),
+        role
+      };
+      if (role === 'company') {
+        data.companyName = document.getElementById('reg-company-name').value.trim();
+        data.companyIndustry = document.getElementById('reg-company-industry').value;
+        data.companyAddress = document.getElementById('reg-company-address').value.trim();
+        if (!data.companyName) { Components.showAlert('danger', 'Error', 'Nama perusahaan wajib diisi.'); return; }
+      } else {
+        data.education = document.getElementById('reg-education').value;
+        data.experience = parseInt(document.getElementById('reg-experience').value) || 0;
+        data.salaryPreference = parseInt(document.getElementById('reg-salary').value) || 0;
+        data.skills = selectedSkills;
+      }
+      const result = Auth.register(data);
+      if (result.success) {
+        Components.showAlert('success', 'Berhasil', 'Akun berhasil dibuat! Silakan masuk.');
+        setTimeout(() => { window.location.href = '/pages/login.html'; }, 1500);
+      } else {
+        Components.showAlert('danger', 'Gagal', result.message);
+      }
+    }
+  </script>
+</body>
+</html>

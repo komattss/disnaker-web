@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <meta name="description" content="Masuk ke Sistem Informasi Lowongan Kerja Terpadu">
+  <title>Masuk - Disnaker</title>
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="auth-left">
+      <div class="auth-brand">
+        <img src="/assets/logo.svg" alt="Disnakerja" class="auth-brand-logo">
+        <p>Sistem Informasi Lowongan Kerja Terpadu dengan Verifikasi Anti-Hoax</p>
+      </div>
+      <div class="auth-features">
+        <div class="auth-feature"><i class="fas fa-shield-alt"></i><span>Lowongan Terverifikasi</span></div>
+        <div class="auth-feature"><i class="fas fa-magic"></i><span>Rekomendasi Cerdas</span></div>
+        <div class="auth-feature"><i class="fas fa-chart-line"></i><span>Dashboard Real-time</span></div>
+        <div class="auth-feature"><i class="fas fa-lock"></i><span>Data Aman & Terpercaya</span></div>
+      </div>
+    </div>
+
+    <div class="auth-right">
+      <div class="auth-form-container">
+        <h2>Masuk</h2>
+        <p class="auth-subtitle">Silakan masuk ke akun Anda untuk melanjutkan</p>
+
+        <form id="login-form" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <label class="form-label">Email <span class="required">*</span></label>
+            <input type="email" id="login-email" class="form-control" placeholder="contoh@email.com" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password <span class="required">*</span></label>
+            <input type="password" id="login-password" class="form-control" placeholder="Masukkan password" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg btn-block" id="login-btn">
+            <i class="fas fa-sign-in-alt"></i> Masuk
+          </button>
+        </form>
+
+        <div class="auth-footer">
+          Belum punya akun? <a href="/pages/register.html">Daftar sekarang</a>
+        </div>
+
+
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/utils.js"></script>
+  <script src="/data/seed.js"></script>
+  <script src="/js/database.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/settings.js"></script>
+  <script src="/js/components.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    // Redirect if already logged in
+    if (Auth.isLoggedIn()) window.location.href = '/index.html';
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const result = Auth.login(email, password);
+      if (result.success) {
+        window.location.href = '/index.html';
+      } else {
+        Components.showAlert('danger', 'Gagal Masuk', result.message);
+      }
+    }
+  </script>
+</body>
+</html>

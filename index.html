@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <meta name="description" content="Sistem Informasi Lowongan Kerja Terpadu - Dinas Tenaga Kerja">
+  <title>Dashboard - Disnaker | Sistem Informasi Lowongan Kerja</title>
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script src="/js/utils.js"></script>
+  <script src="/data/seed.js"></script>
+  <script src="/js/database.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/settings.js"></script>
+  <script src="/js/recommendation.js"></script>
+  <script src="/js/components.js"></script>
+
+  <script src="/js/verification.js"></script>
+  <script src="/js/search.js"></script>
+  <script src="/js/charts.js"></script>
+  <script src="/js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // ── Show skeleton loading first ──
+      const skeletonContent = `
+        <div class="dashboard-compact">
+          <div class="page-header">
+            <h1><i class="fas fa-th-large" style="color:var(--primary-500);margin-right:var(--space-2)"></i> Dashboard</h1>
+            <p>Memuat data...</p>
+          </div>
+          ${Components.renderSkeletonStats(4)}
+          ${Components.renderSkeletonJobCards(6)}
+        </div>
+      `;
+      Components.renderLayout('dashboard', 'Dashboard', skeletonContent);
+
+      // ── Load real content after brief delay for skeleton effect ──
+      setTimeout(() => {
+        const user = Auth.getCurrentUser();
+        const stats = DB.getStats();
+        const recentJobs = DB.getVerifiedJobs().sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6);
+
+        // ── Ticker data ──
+        const hiringCompanies = DB.getHiringCompanies();
+        const tickerHtml = Components.renderTicker(hiringCompanies);
+
+        // ── Recommendation section (user role only) ──
+        let recommendationHtml = '';
+        if (user && user.role === 'user') {
+          const verifiedJobs = DB.getVerifiedJobs();
+          const applications = DB.getApplications();
+          const recommended = Recommendation.getRecommendedJobs(user, verifiedJobs, applications).slice(0, 6);
+          if (recommended.length > 0) {
+            const recCards = recommended.map((j, idx) => {
+              j._idx = idx;
+              return Components.renderJobCardWithMatch(j, j.matchScore);
+            }).join('');
+            recommendationHtml = `
+              <div class="recommendation-section">
+                <div class="section-header">
+                  <div>
+                    <h2><i class="fas fa-wand-magic-sparkles"></i> Rekomendasi untuk Anda</h2>
+                    <p class="section-subtitle">Lowongan yang paling cocok berdasarkan profil Anda</p>
+                  </div>
+                  <a href="/pages/jobs.html" class="btn btn-outline btn-sm"><i class="fas fa-arrow-right"></i> Lihat Semua</a>
+                </div>
+                <div class="recommendation-scroll">${recCards}</div>
+              </div>
+            `;
+          }
+        }
+
+        // ── Swasta / BUMN category section ──
+        const swastaJobs = DB.getJobsByCompanyType('swasta');
+        const bumnJobs = DB.getJobsByCompanyType('bumn');
+
+        const emptySwastaHtml = Components.renderEmptyState({ icon: 'fa-building', title: 'Belum ada lowongan swasta', description: 'Lowongan dari perusahaan swasta akan muncul di sini.', ctaText: 'Lihat Semua Lowongan', ctaHref: '/pages/jobs.html', ctaIcon: 'fa-briefcase' });
+        const emptyBumnHtml = Components.renderEmptyState({ icon: 'fa-landmark', title: 'Belum ada lowongan BUMN', description: 'Lowongan dari perusahaan BUMN akan muncul di sini.', ctaText: 'Lihat Semua Lowongan', ctaHref: '/pages/jobs.html', ctaIcon: 'fa-briefcase' });
+
+        const categorySection = `
+          <div class="mb-4">
+            <div class="flex-between mb-4">
+              <h2 style="font-size:var(--font-size-lg);font-weight:800">
+                <i class="fas fa-building" style="color:var(--primary-500);margin-right:var(--space-2)"></i> Lowongan Berdasarkan Kategori
+              </h2>
+            </div>
+            <div class="category-tabs" id="category-tabs">
+              <button class="category-tab active" data-tab="all" onclick="switchCategory('all')">
+                <i class="fas fa-globe"></i> Semua <span class="tab-count" role="status" aria-label="${swastaJobs.length + bumnJobs.length} lowongan">${swastaJobs.length + bumnJobs.length}</span>
+              </button>
+              <button class="category-tab" data-tab="swasta" onclick="switchCategory('swasta')">
+                <i class="fas fa-building"></i> Swasta <span class="tab-count" role="status" aria-label="${swastaJobs.length} lowongan swasta">${swastaJobs.length}</span>
+              </button>
+              <button class="category-tab" data-tab="bumn" onclick="switchCategory('bumn')">
+                <i class="fas fa-landmark"></i> BUMN <span class="tab-count" role="status" aria-label="${bumnJobs.length} lowongan BUMN">${bumnJobs.length}</span>
+              </button>
+            </div>
+            <div class="category-content active" id="cat-all">
+              <div class="jobs-grid">
+                ${[...swastaJobs, ...bumnJobs].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6).map(j => Components.renderJobCard(j)).join('')}
+              </div>
+            </div>
+            <div class="category-content" id="cat-swasta">
+              ${swastaJobs.length > 0 ? '<div class="jobs-grid">' + swastaJobs.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6).map(j => Components.renderJobCard(j)).join('') + '</div>' : emptySwastaHtml}
+            </div>
+            <div class="category-content" id="cat-bumn">
+              ${bumnJobs.length > 0 ? '<div class="jobs-grid">' + bumnJobs.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6).map(j => Components.renderJobCard(j)).join('') + '</div>' : emptyBumnHtml}
+            </div>
+          </div>
+        `;
+
+        // ── Job Fair Section ──
+        const jobFairs = DB.getUpcomingJobFairs();
+        let jobFairHtml = '';
+        if (jobFairs.length > 0) {
+          const fairCards = jobFairs.map(f => Components.renderJobFairCard(f)).join('');
+          jobFairHtml = `
+            <div class="jobfair-section">
+              <div class="section-header">
+                <h2>
+                  <i class="fas fa-calendar-check" style="color:var(--accent-500);margin-right:var(--space-2)"></i> Informasi Job Fair
+                </h2>
+              </div>
+              <p style="font-size:var(--font-size-sm);color:var(--text-secondary);margin-bottom:var(--space-4);">
+                Jadwal pameran lowongan kerja yang akan datang dari berbagai instansi
+              </p>
+              <div class="jobfair-scroll">${fairCards}</div>
+            </div>
+          `;
+        }
+
+        // ── Pelatihan Kompetensi Section ──
+        const trainings = DB.getOpenTrainings();
+        let trainingHtml = '';
+        if (trainings.length > 0) {
+          const trainingCards = trainings.slice(0, 6).map(t => Components.renderTrainingCard(t)).join('');
+          trainingHtml = `
+            <div class="training-section">
+              <div class="section-header">
+                <h2>
+                  <i class="fas fa-graduation-cap" style="color:var(--success);margin-right:var(--space-2)"></i> Pelatihan Kompetensi
+                </h2>
+              </div>
+              <p style="font-size:var(--font-size-sm);color:var(--text-secondary);margin-bottom:var(--space-4);">
+                Program pelatihan dan sertifikasi dari berbagai instansi untuk meningkatkan kompetensi Anda
+              </p>
+              <div class="training-grid">${trainingCards}</div>
+            </div>
+          `;
+        }
+
+        let welcomeMessage = 'Selamat datang di Sistem Informasi Lowongan Kerja Terpadu';
+        let roleDashboard = '';
+
+        if (user) {
+          welcomeMessage = `Selamat datang kembali, ${Utils.escapeHtml(user.name)}!`;
+
+          if (user.role === 'company') {
+            const myJobs = DB.getJobsByCompany(user.id);
+            const emptyCompanyHtml = Components.renderEmptyState({ icon: 'fa-briefcase', title: 'Belum ada lowongan', description: 'Mulai pasang lowongan kerja untuk menemukan kandidat terbaik.', ctaText: 'Pasang Lowongan', ctaHref: '/pages/post-job.html', ctaIcon: 'fa-plus' });
+            roleDashboard = `
+              <div class="card mb-6">
+                <div class="card-header">
+                  <h3><i class="fas fa-building" style="color:var(--primary-500);margin-right:var(--space-2)"></i> Lowongan Perusahaan Anda</h3>
+                  <a href="/pages/post-job.html" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Pasang Lowongan</a>
+                </div>
+                <div class="card-body">
+                  ${myJobs.length === 0 ? emptyCompanyHtml :
+                  `<div class="table-container"><table class="table">
+                    <thead><tr><th>Posisi</th><th>Kategori</th><th>Status</th><th>Pelamar</th><th>Tanggal</th></tr></thead>
+                    <tbody>
+                      ${myJobs.map(j => {
+                        const appCount = DB.getApplicationsByJob(j.id).length;
+                        const sLabel = j.status === 'verified' ? 'Terverifikasi' : j.status === 'pending' ? 'Menunggu' : 'Ditolak';
+                        return `<tr>
+                          <td><strong>${Utils.escapeHtml(j.title)}</strong></td>
+                          <td>${Utils.escapeHtml(j.category)}</td>
+                          <td><span class="verified-badge ${j.status}" role="status" aria-label="Status: ${sLabel}">${j.status === 'verified' ? '<i class="fas fa-check-circle"></i> Terverifikasi' : j.status === 'pending' ? '<i class="fas fa-clock"></i> Menunggu' : '<i class="fas fa-times-circle"></i> Ditolak'}</span></td>
+                          <td>${appCount} orang</td>
+                          <td>${Utils.formatDateShort(j.createdAt)}</td>
+                        </tr>`;
+                      }).join('')}
+                    </tbody>
+                  </table></div>`}
+                </div>
+              </div>
+            `;
+          }
+        }
+
+        const content = `
+          <div class="dashboard-compact">
+            ${tickerHtml}
+            <div class="page-header">
+              <h1><i class="fas fa-th-large" style="color:var(--primary-500);margin-right:var(--space-2)"></i> Dashboard</h1>
+              <p>${welcomeMessage}</p>
+            </div>
+            <div class="stats-grid">
+              <div class="stat-card"><div class="stat-icon"><i class="fas fa-briefcase"></i></div><div class="stat-info"><h3>${stats.totalJobs}</h3><p>Total Lowongan</p></div></div>
+              <div class="stat-card"><div class="stat-icon"><i class="fas fa-check-circle"></i></div><div class="stat-info"><h3>${stats.verifiedJobs}</h3><p>Terverifikasi</p></div></div>
+              <div class="stat-card"><div class="stat-icon"><i class="fas fa-clock"></i></div><div class="stat-info"><h3>${stats.pendingJobs}</h3><p>Menunggu Verifikasi</p></div></div>
+              <div class="stat-card"><div class="stat-icon"><i class="fas fa-users"></i></div><div class="stat-info"><h3>${stats.totalUsers + stats.totalCompanies}</h3><p>Total Pengguna</p></div></div>
+            </div>
+            ${recommendationHtml}
+            ${roleDashboard}
+            ${jobFairHtml}
+            ${trainingHtml}
+            ${categorySection}
+            <div class="charts-grid">
+              <div class="chart-card"><h3><i class="fas fa-chart-pie" style="color:var(--primary-500);margin-right:var(--space-2)"></i> Lowongan per Kategori</h3><div style="height:200px"><canvas id="chart-category"></canvas></div></div>
+              <div class="chart-card"><h3><i class="fas fa-chart-bar" style="color:var(--accent-500);margin-right:var(--space-2)"></i> Status Verifikasi</h3><div style="height:200px"><canvas id="chart-status"></canvas></div></div>
+            </div>
+            <div class="flex-between mb-4">
+              <h2 style="font-size:var(--font-size-lg);font-weight:800"><i class="fas fa-fire" style="color:var(--danger);margin-right:var(--space-2)"></i> Lowongan Terbaru</h2>
+              <a href="/pages/jobs.html" class="btn btn-outline btn-sm">Lihat Semua <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="jobs-grid">
+              ${recentJobs.map(j => Components.renderJobCard(j)).join('')}
+            </div>
+          </div>
+        `;
+
+        // Replace skeleton with real content
+        document.querySelector('.page-content').innerHTML = content;
+
+        // Render charts after content is in DOM
+        setTimeout(() => {
+          Charts.renderJobsByCategory('chart-category');
+          Charts.renderJobsByStatus('chart-status');
+        }, 100);
+      }, 400);
+    });
+
+    // ── Category tab switching ──
+    function switchCategory(tab) {
+      // Update tab buttons
+      document.querySelectorAll('.category-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+      });
+      // Update content panels
+      document.querySelectorAll('.category-content').forEach(panel => {
+        panel.classList.toggle('active', panel.id === 'cat-' + tab);
+      });
+    }
+  </script>
+</body>
+</html>

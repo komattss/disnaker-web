@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <title>Verifikasi Lowongan - Disnaker</title>
+  <link rel="stylesheet" href="/css/variables.css">
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="stylesheet" href="/css/components.css">
+  <link rel="stylesheet" href="/css/pages.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+  <div id="app"></div>
+  <script src="/js/utils.js"></script>
+  <script src="/data/seed.js"></script>
+  <script src="/js/database.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/settings.js"></script>
+  <script src="/js/components.js"></script>
+  <script src="/js/verification.js"></script>
+  <script src="/js/search.js"></script>
+  <script src="/js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!Auth.requireAuth(['admin'])) return;
+      renderPage();
+    });
+
+    window.refreshVerificationPage = renderPage;
+
+    function renderPage() {
+      const vStats = Verification.getVerificationStats();
+      const allJobs = DB.getJobs().sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+      let currentTab = 'pending';
+
+      function getFilteredJobs(tab) {
+        if (tab === 'all') return allJobs;
+        return allJobs.filter(j => j.status === tab);
+      }
+
+      function renderJobs(tab) {
+        currentTab = tab;
+        const jobs = getFilteredJobs(tab);
+        const container = document.getElementById('verification-jobs');
+        if (!container) return;
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.tab === tab);
+        });
+
+        if (jobs.length === 0) {
+          container.innerHTML = `<div class="empty-state"><div class="empty-icon"><i class="fas fa-check-double"></i></div><h3>Tidak ada lowongan</h3><p>Tidak ada lowongan dalam status ini.</p></div>`;
+          return;
+        }
+
+        container.innerHTML = `
+          <div class="table-container">
+            <table class="table">
+              <thead><tr><th>Posisi</th><th>Perusahaan</th><th>Lokasi</th><th>Kategori</th><th>Tanggal</th><th>Status</th><th>Aksi</th></tr></thead>
+              <tbody>
+                ${jobs.map(j => {
+                  const company = DB.getUserById(j.companyId);
+                  return `<tr>
+                    <td>
+                      <div><strong>${Utils.escapeHtml(j.title)}</strong></div>
+                      <div style="font-size:var(--font-size-xs);color:var(--text-muted);margin-top:2px;">${(j.skills||[]).slice(0,3).map(s => s).join(', ')}</div>
+                    </td>
+                    <td>${Utils.escapeHtml(j.company)}</td>
+                    <td><i class="fas fa-map-marker-alt" style="color:var(--gray-400);margin-right:4px;"></i>${Utils.escapeHtml(j.location)}</td>
+                    <td><span class="tag">${Utils.escapeHtml(j.category)}</span></td>
+                    <td>${Utils.formatDateShort(j.createdAt)}</td>
+                    <td><span class="verified-badge ${j.status}">${j.status === 'verified' ? '<i class="fas fa-check-circle"></i> Verified' : j.status === 'pending' ? '<i class="fas fa-clock"></i> Pending' : '<i class="fas fa-times-circle"></i> Rejected'}</span></td>
+                    <td>
+                      <div style="display:flex;gap:var(--space-2);">
+                        <button class="btn btn-ghost btn-sm" onclick="viewJobDetail('${j.id}')" title="Detail"><i class="fas fa-eye"></i></button>
+                        ${j.status === 'pending' ? `
+                          <button class="btn btn-success btn-sm" onclick="approveJob('${j.id}')" title="Setujui"><i class="fas fa-check"></i></button>
+                          <button class="btn btn-danger btn-sm" onclick="Verification.showRejectDialog('${j.id}')" title="Tolak"><i class="fas fa-times"></i></button>
+                        ` : ''}
+                      </div>
+                    </td>
+                  </tr>`;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+
+      const content = `
+        <div class="page-header">
+          <h1><i class="fas fa-check-double" style="color:var(--primary-500);margin-right:var(--space-3)"></i> Verifikasi Lowongan</h1>
+          <p>Tinjau dan verifikasi lowongan kerja yang diajukan perusahaan</p>
+        </div>
+
+        <div class="stats-grid" style="margin-bottom:var(--space-6)">
+          <div class="stat-card"><div class="stat-icon"><i class="fas fa-inbox"></i></div><div class="stat-info"><h3>${vStats.total}</h3><p>Total</p></div></div>
+          <div class="stat-card"><div class="stat-icon"><i class="fas fa-check-circle"></i></div><div class="stat-info"><h3>${vStats.verified}</h3><p>Terverifikasi</p></div></div>
+          <div class="stat-card"><div class="stat-icon"><i class="fas fa-clock"></i></div><div class="stat-info"><h3>${vStats.pending}</h3><p>Menunggu</p></div></div>
+          <div class="stat-card"><div class="stat-icon"><i class="fas fa-times-circle"></i></div><div class="stat-info"><h3>${vStats.rejected}</h3><p>Ditolak</p></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <div class="tabs">
+              <button class="tab-btn active" data-tab="pending" onclick="window._renderJobs('pending')"><i class="fas fa-clock" style="margin-right:4px;"></i> Menunggu (${vStats.pending})</button>
+              <button class="tab-btn" data-tab="verified" onclick="window._renderJobs('verified')"><i class="fas fa-check-circle" style="margin-right:4px;"></i> Terverifikasi (${vStats.verified})</button>
+              <button class="tab-btn" data-tab="rejected" onclick="window._renderJobs('rejected')"><i class="fas fa-times-circle" style="margin-right:4px;"></i> Ditolak (${vStats.rejected})</button>
+              <button class="tab-btn" data-tab="all" onclick="window._renderJobs('all')"><i class="fas fa-list" style="margin-right:4px;"></i> Semua (${vStats.total})</button>
+            </div>
+            <div id="verification-jobs"></div>
+          </div>
+        </div>
+      `;
+
+      Components.renderLayout('admin-verification', 'Verifikasi', content);
+      window._renderJobs = renderJobs;
+      renderJobs('pending');
+    }
+
+    function viewJobDetail(jobId) {
+      const job = DB.getJobById(jobId);
+      if (!job) return;
+      const salary = Utils.salaryRange(job.salaryMin, job.salaryMax);
+      Components.showModal({
+        title: job.title,
+        size: '700px',
+        body: `
+          <div style="display:grid;gap:var(--space-4);">
+            <div style="display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;">
+              <span class="verified-badge ${job.status}">${job.status === 'verified' ? '<i class="fas fa-check-circle"></i> Terverifikasi' : job.status === 'pending' ? '<i class="fas fa-clock"></i> Menunggu' : '<i class="fas fa-times-circle"></i> Ditolak'}</span>
+              <span class="badge badge-neutral">${job.category}</span>
+              <span class="badge badge-info">${job.type || 'Full-time'}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3);font-size:var(--font-size-sm);">
+              <div><strong>Perusahaan:</strong> ${Utils.escapeHtml(job.company)}</div>
+              <div><strong>Lokasi:</strong> ${Utils.escapeHtml(job.location)}</div>
+              <div><strong>Pendidikan:</strong> ${job.education}</div>
+              <div><strong>Pengalaman:</strong> ${job.experience ? job.experience + ' tahun' : 'Fresh Graduate'}</div>
+              <div><strong>Gaji:</strong> ${salary}</div>
+              <div><strong>Skills:</strong> ${(job.skills||[]).join(', ')}</div>
+            </div>
+            <div><strong style="font-size:var(--font-size-sm);">Deskripsi:</strong><p style="font-size:var(--font-size-sm);color:var(--text-secondary);margin-top:var(--space-1);">${Utils.escapeHtml(job.description)}</p></div>
+            ${job.requirements ? `<div><strong style="font-size:var(--font-size-sm);">Persyaratan:</strong><ul style="padding-left:var(--space-5);margin-top:var(--space-1);font-size:var(--font-size-sm);color:var(--text-secondary);">${job.requirements.map(r => `<li style="list-style:disc;margin-bottom:4px;">${Utils.escapeHtml(r)}</li>`).join('')}</ul></div>` : ''}
+            ${job.rejectionReason ? `<div style="padding:var(--space-3);background:var(--danger-light);border-radius:var(--radius-md);font-size:var(--font-size-sm);"><strong style="color:var(--danger-dark);">Alasan Penolakan:</strong> ${Utils.escapeHtml(job.rejectionReason)}</div>` : ''}
+          </div>
+        `,
+        footer: job.status === 'pending' ? `
+          <button class="btn btn-outline" onclick="Components.closeModal()">Tutup</button>
+          <button class="btn btn-danger" onclick="Components.closeModal();Verification.showRejectDialog('${job.id}')"><i class="fas fa-times"></i> Tolak</button>
+          <button class="btn btn-success" onclick="Components.closeModal();approveJob('${job.id}')"><i class="fas fa-check"></i> Setujui</button>
+        ` : `<button class="btn btn-outline" onclick="Components.closeModal()">Tutup</button>`
+      });
+    }
+
+    function approveJob(jobId) {
+      Components.showDialog({
+        type: 'question', title: 'Setujui Lowongan?',
+        text: 'Lowongan akan dipublikasikan dan dapat dilihat oleh pencari kerja.',
+        confirmText: 'Ya, Setujui', cancelText: 'Batal',
+        onConfirm: () => {
+          Verification.approveJob(jobId);
+          setTimeout(() => renderPage(), 400);
+        }
+      });
+    }
+  </script>
+</body>
+</html>
