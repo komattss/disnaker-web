@@ -86,11 +86,14 @@
 
         const content = `
           <div class="profile-header">
+            <div class="profile-banner"></div>
             <div class="profile-avatar">${initials}</div>
-            <div class="profile-info">
-              <h2>${Utils.escapeHtml(user.name)}</h2>
-              <p><i class="fas fa-envelope" style="margin-right:var(--space-2);"></i>${Utils.escapeHtml(user.email)}</p>
-              <p style="margin-top:var(--space-1);"><span class="badge badge-primary" style="background:rgba(255,255,255,0.2);color:white;">${user.role === 'user' ? 'Pencari Kerja' : user.role === 'company' ? 'Perusahaan' : 'Admin'}</span></p>
+            <div class="profile-body">
+              <div class="profile-info">
+                <h2>${Utils.escapeHtml(user.name)}</h2>
+                <p><i class="fas fa-envelope" style="margin-right:var(--space-2);"></i>${Utils.escapeHtml(user.email)}</p>
+                <p style="margin-top:var(--space-1);"><span class="badge badge-primary">${user.role === 'user' ? 'Pencari Kerja' : user.role === 'company' ? 'Perusahaan' : 'Admin'}</span></p>
+              </div>
             </div>
           </div>
           <div class="card">

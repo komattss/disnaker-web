@@ -83,7 +83,7 @@
 /* ── Auth Pages ── */
 .auth-wrapper { min-height: 100vh; display: flex; }
 .auth-left {
-  flex: 1; background: #4483DB;
+  flex: 1; background: var(--primary-500);
   display: flex; flex-direction: column; justify-content: center; align-items: center;
   padding: var(--space-12); color: white; position: relative; overflow: hidden;
 }
@@ -114,15 +114,43 @@
 .role-option .role-name { font-weight: var(--font-weight-semibold); font-size: var(--font-size-sm); }
 .role-option .role-desc { font-size: var(--font-size-xs); color: var(--text-secondary); margin-top: var(--space-1); }
 
-/* ── Profile ── */
+/* ── Profile (LinkedIn-style) ── */
 .profile-header {
-  display: flex; align-items: center; gap: var(--space-6); padding: var(--space-8);
-  background: linear-gradient(135deg, var(--primary-600), var(--accent-600));
-  border-radius: var(--radius-xl); color: white; margin-bottom: var(--space-8);
+  display: flex; flex-direction: column; position: relative;
+  background: var(--bg-card); border-radius: 16px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-card);
+  margin-bottom: var(--space-10); overflow: visible;
 }
-.profile-avatar { width: 80px; height: 80px; border-radius: var(--radius-full); background: rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold); flex-shrink: 0; border: 3px solid rgba(255,255,255,0.3); }
-.profile-info h2 { font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); margin-bottom: var(--space-1); }
-.profile-info p { opacity: 0.85; font-size: var(--font-size-sm); }
+.profile-banner {
+  width: 100%; height: 140px;
+  background: linear-gradient(135deg, var(--primary-500), var(--primary-700));
+  border-radius: 16px 16px 0 0;
+  position: relative;
+}
+.profile-banner::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 80% 30%, rgba(255,255,255,0.12) 0%, transparent 60%);
+  border-radius: 16px 16px 0 0;
+}
+.profile-avatar {
+  width: 96px; height: 96px; border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--font-size-3xl); font-weight: var(--font-weight-bold);
+  flex-shrink: 0; border: 4px solid white;
+  color: white; box-shadow: var(--shadow-lg);
+  position: absolute; left: var(--space-8); top: 92px; z-index: 2;
+}
+.profile-body {
+  padding: 60px var(--space-8) var(--space-6) var(--space-8);
+}
+.profile-info h2 {
+  font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold);
+  margin-bottom: var(--space-1); color: var(--text-primary);
+}
+.profile-info p { color: var(--text-secondary); font-size: var(--font-size-sm); }
 
 /* ── Charts ── */
 .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: var(--space-4); margin-bottom: var(--space-5); }
@@ -210,7 +238,9 @@
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
   .jobs-grid { grid-template-columns: 1fr; }
   .charts-grid { grid-template-columns: 1fr; }
-  .profile-header { flex-direction: column; text-align: center; }
+  .profile-header { text-align: center; }
+  .profile-avatar { left: 50%; transform: translateX(-50%); }
+  .profile-body { text-align: center; }
 }
 @media (max-width: 480px) {
   .stats-grid { grid-template-columns: 1fr; }
@@ -224,11 +254,11 @@
 /* ═══ Ticker / Marquee Notification ═══ */
 .ticker-bar {
   display: flex; align-items: stretch; overflow: hidden;
-  background: linear-gradient(135deg, var(--primary-800), var(--primary-900));
+  background: linear-gradient(135deg, var(--primary-600), var(--primary-800));
   border-radius: var(--radius-xl); margin-bottom: var(--space-8);
   color: var(--text-inverse); font-size: var(--font-size-sm);
   box-shadow: var(--shadow-md); position: relative;
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(59,130,246,0.15);
   width: 100%; max-width: 100%;
 }
 .ticker-label {
@@ -299,9 +329,10 @@
 /* ═══ Recommendation Section ═══ */
 .recommendation-section {
   margin-bottom: var(--space-8); padding: var(--space-6);
-  background: linear-gradient(135deg, var(--primary-50) 0%, var(--accent-50) 100%);
+  background: linear-gradient(135deg, var(--primary-50) 0%, #F0F7FF 100%);
   border-radius: var(--radius-xl); border: 1px solid var(--border-color);
   position: relative; overflow: hidden;
+  box-shadow: var(--shadow-card);
 }
 .recommendation-section::before {
   content: ''; position: absolute; top: -30%; right: -8%; width: 200px; height: 200px;

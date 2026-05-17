@@ -175,7 +175,7 @@ const Components = {
       <aside class="sidebar" id="sidebar">
         <div class="sidebar-brand">
           <a href="/index.html" class="brand-logo-link">
-            <img src="/assets/logo.svg" alt="Disnakerja Logo" class="brand-logo-img">
+            <img src="/assets/logo.png" alt="Disnakerja Logo" class="brand-logo-img">
           </a>
         </div>
         <nav class="sidebar-nav">${navHtml}</nav>
@@ -488,6 +488,34 @@ const Components = {
     `;
   },
 
+  // ── Global Footer ──
+  renderFooter() {
+    return `
+      <footer class="app-footer">
+        <div class="footer-inner">
+          <div class="footer-top">
+            <div class="footer-links">
+              <a href="#">Terbaru</a>
+              <a href="#">Pendidikan</a>
+              <a href="#">Jurusan</a>
+              <a href="#">Lokasi</a>
+              <a href="#">Hubungi Kami</a>
+            </div>
+            <div class="footer-socials">
+              <a href="#" class="footer-social-icon" title="Twitter" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+              <a href="#" class="footer-social-icon" title="Instagram" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+              <a href="#" class="footer-social-icon" title="LinkedIn" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            </div>
+          </div>
+          <hr class="footer-divider">
+          <div class="footer-bottom">
+            &copy; 2026 DISNAKER DSS - All Rights Reserved
+          </div>
+        </div>
+      </footer>
+    `;
+  },
+
   // ── Layout Shell ──
   renderLayout(currentPage, navbarTitle, contentHtml) {
     document.body.innerHTML = `
@@ -498,6 +526,7 @@ const Components = {
           <div class="page-content">${contentHtml}</div>
         </div>
       </div>
+      ${Components.renderFooter()}
     `;
     // close sidebar on overlay click
     const overlay = document.getElementById('sidebar-overlay');

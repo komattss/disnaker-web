@@ -1,25 +1,34 @@
 /* ============================================
    DISNAKER WEB - Component Styles
-   Theme: Civic Digital
+   Theme: Clean Light
    ============================================ */
 
 /* ── Cards ── */
-.card { background: var(--bg-card); border-radius: var(--radius-xl); border: 1px solid var(--border-color); overflow: hidden; transition: all var(--transition-normal); }
+.card {
+  background: var(--bg-card); border-radius: var(--radius-xl);
+  border: 1px solid var(--border-color); overflow: hidden;
+  transition: all var(--transition-normal);
+  box-shadow: var(--shadow-card);
+}
 .card:hover { box-shadow: var(--shadow-md); }
 .card-body { padding: var(--space-6); }
-.card-header { padding: var(--space-5) var(--space-6); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
+.card-header {
+  padding: var(--space-5) var(--space-6); border-bottom: 1px solid var(--border-color);
+  display: flex; align-items: center; justify-content: space-between;
+}
 .card-header h3 { font-size: var(--font-size-md); font-weight: var(--font-weight-semibold); font-family: var(--font-heading); }
 .card-footer { padding: var(--space-4) var(--space-6); border-top: 1px solid var(--border-color); background: var(--gray-50); }
 
 /* ── Stat Cards ── */
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: var(--space-4); margin-bottom: var(--space-5); }
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: var(--space-4); margin-bottom: var(--space-6); }
 .stat-card {
   background: var(--bg-card); border-radius: var(--radius-xl); padding: var(--space-6);
   border: 1px solid var(--border-color); display: flex; align-items: flex-start;
   gap: var(--space-4); transition: all var(--transition-normal); position: relative; overflow: hidden;
+  box-shadow: var(--shadow-card);
 }
 .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
-.stat-card:nth-child(1)::before { background: linear-gradient(90deg, var(--primary-600), var(--primary-500)); }
+.stat-card:nth-child(1)::before { background: linear-gradient(90deg, var(--primary-500), var(--primary-600)); }
 .stat-card:nth-child(2)::before { background: linear-gradient(90deg, var(--success), var(--success-dark)); }
 .stat-card:nth-child(3)::before { background: linear-gradient(90deg, var(--warning), var(--warning-dark)); }
 .stat-card:nth-child(4)::before { background: linear-gradient(90deg, var(--accent-500), var(--accent-600)); }
@@ -33,7 +42,7 @@
 .stat-card:nth-child(2) .stat-icon { background: var(--success-light); color: var(--success); }
 .stat-card:nth-child(3) .stat-icon { background: var(--warning-light); color: var(--warning-dark); }
 .stat-card:nth-child(4) .stat-icon { background: var(--accent-50); color: var(--accent-600); }
-.stat-info h3 { font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); letter-spacing: -0.02em; font-family: var(--font-heading); }
+.stat-info h3 { font-size: var(--font-size-2xl); font-weight: var(--font-weight-bold); letter-spacing: -0.02em; font-family: var(--font-heading); color: var(--text-primary); }
 .stat-info p { font-size: var(--font-size-sm); color: var(--text-secondary); margin-top: var(--space-1); }
 
 /* ── Job Cards ── */
@@ -45,10 +54,12 @@
   animation: cardReveal 0.5s ease both;
   animation-delay: calc(0.07s * var(--card-index, 0));
   border-left: 3px solid transparent;
+  box-shadow: var(--shadow-card);
+  min-height: 240px;
 }
 .job-card:hover {
   transform: translateY(-4px); box-shadow: var(--shadow-lg);
-  border-left-color: var(--accent-500);
+  border-left-color: var(--primary-500);
 }
 .job-card .job-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-4); }
 .job-card .job-company-logo {
@@ -59,7 +70,7 @@
   color: var(--primary-600); flex-shrink: 0;
   font-family: var(--font-heading);
 }
-.job-card .job-title { font-size: var(--font-size-md); font-weight: var(--font-weight-bold); margin-bottom: var(--space-1); display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-family: var(--font-heading); }
+.job-card .job-title { font-size: var(--font-size-md); font-weight: var(--font-weight-bold); margin-bottom: var(--space-1); display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-family: var(--font-heading); color: var(--text-primary); }
 .job-card .job-company { font-size: var(--font-size-sm); color: var(--text-secondary); }
 .job-card .job-meta { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-bottom: var(--space-4); }
 .job-card .job-meta-item { display: flex; align-items: center; gap: var(--space-1); font-size: var(--font-size-xs); color: var(--text-secondary); }
@@ -102,8 +113,13 @@
 .badge-warning { background: var(--warning-light); color: var(--warning-dark); }
 .badge-danger { background: var(--danger-light); color: var(--danger-dark); }
 .badge-info { background: var(--info-light); color: var(--info-dark); }
-.badge-neutral { background: var(--gray-100); color: var(--gray-700); }
-.tag { display: inline-flex; align-items: center; padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); font-size: var(--font-size-xs); font-weight: var(--font-weight-medium); background: var(--gray-100); color: var(--gray-700); transition: all var(--transition-fast); }
+.badge-neutral { background: var(--gray-100); color: var(--gray-600); }
+.tag {
+  display: inline-flex; align-items: center; padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm); font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium); background: var(--gray-100);
+  color: var(--gray-600); transition: all var(--transition-fast);
+}
 .tag:hover { background: var(--primary-50); color: var(--primary-600); }
 
 /* ── Buttons ── */
@@ -115,14 +131,21 @@
   text-decoration: none; white-space: nowrap; line-height: 1;
 }
 .btn:active { transform: scale(0.97); }
-.btn-primary { background: linear-gradient(135deg, var(--primary-500), var(--primary-600)); color: white; box-shadow: 0 2px 8px rgba(27,58,107,0.3); }
-.btn-primary:hover { background: linear-gradient(135deg, var(--primary-400), var(--primary-500)); box-shadow: 0 4px 14px rgba(27,58,107,0.4); color: white; transform: translateY(-1px); }
-.btn-accent { background: linear-gradient(135deg, var(--accent-500), var(--accent-600)); color: white; box-shadow: var(--shadow-accent); }
-.btn-accent:hover { background: linear-gradient(135deg, var(--accent-400), var(--accent-500)); box-shadow: 0 6px 18px rgba(232,100,10,0.35); color: white; transform: translateY(-1px); }
-.btn-success { background: linear-gradient(135deg, var(--success), var(--success-dark)); color: white; box-shadow: 0 2px 8px rgba(45,122,79,0.3); }
-.btn-success:hover { box-shadow: 0 4px 12px rgba(45,122,79,0.4); color: white; transform: translateY(-1px); }
-.btn-danger { background: linear-gradient(135deg, var(--danger), var(--danger-dark)); color: white; box-shadow: 0 2px 8px rgba(192,48,48,0.3); }
-.btn-danger:hover { box-shadow: 0 4px 12px rgba(192,48,48,0.4); color: white; transform: translateY(-1px); }
+.btn-primary {
+  background: var(--primary-500); color: white;
+  box-shadow: 0 2px 8px rgba(59,130,246,0.25);
+}
+.btn-primary:hover {
+  background: var(--primary-600);
+  box-shadow: 0 4px 14px rgba(59,130,246,0.35);
+  color: white; transform: translateY(-1px);
+}
+.btn-accent { background: var(--accent-500); color: white; box-shadow: var(--shadow-accent); }
+.btn-accent:hover { background: var(--accent-600); box-shadow: 0 6px 18px rgba(249,115,22,0.3); color: white; transform: translateY(-1px); }
+.btn-success { background: var(--success); color: white; box-shadow: 0 2px 8px rgba(22,163,74,0.25); }
+.btn-success:hover { background: var(--success-dark); box-shadow: 0 4px 12px rgba(22,163,74,0.35); color: white; transform: translateY(-1px); }
+.btn-danger { background: var(--danger); color: white; box-shadow: 0 2px 8px rgba(220,38,38,0.25); }
+.btn-danger:hover { background: var(--danger-dark); box-shadow: 0 4px 12px rgba(220,38,38,0.35); color: white; transform: translateY(-1px); }
 .btn-outline { background: transparent; border: 1.5px solid var(--border-color); color: var(--text-primary); }
 .btn-outline:hover { border-color: var(--primary-400); color: var(--primary-600); background: var(--primary-50); }
 .btn-ghost { background: transparent; color: var(--text-secondary); padding: var(--space-2) var(--space-3); }
@@ -138,26 +161,30 @@
 .form-label .required { color: var(--danger); }
 .form-control {
   width: 100%; padding: var(--space-3) var(--space-4); border: 1.5px solid var(--border-color);
-  border-radius: var(--radius-md); font-size: var(--font-size-sm); background: var(--bg-card);
+  border-radius: var(--radius-md); font-size: var(--font-size-sm); background: var(--bg-input);
   color: var(--text-primary); transition: all var(--transition-fast); outline: none;
 }
-.form-control:focus { border-color: var(--primary-500); box-shadow: 0 0 0 3px rgba(27,58,107,0.08); }
+.form-control:focus { border-color: var(--primary-500); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
 .form-control::placeholder { color: var(--text-muted); }
 .form-control.error { border-color: var(--danger); }
 .form-text { font-size: var(--font-size-xs); color: var(--text-secondary); margin-top: var(--space-1); }
 .form-error { font-size: var(--font-size-xs); color: var(--danger); margin-top: var(--space-1); }
 select.form-control {
   appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23555A68' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748B' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
   background-repeat: no-repeat; background-position: right var(--space-4) center; padding-right: var(--space-10);
 }
 .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4); }
 textarea.form-control { min-height: 120px; resize: vertical; }
 .form-check { display: flex; align-items: center; gap: var(--space-2); cursor: pointer; }
-.form-check input[type="checkbox"], .form-check input[type="radio"] { width: 18px; height: 18px; accent-color: var(--primary-600); cursor: pointer; }
+.form-check input[type="checkbox"], .form-check input[type="radio"] { width: 18px; height: 18px; accent-color: var(--primary-500); cursor: pointer; }
 
 /* ── Tables ── */
-.table-container { overflow-x: auto; border-radius: var(--radius-xl); border: 1px solid var(--border-color); background: var(--bg-card); }
+.table-container {
+  overflow-x: auto; border-radius: var(--radius-xl);
+  border: 1px solid var(--border-color); background: var(--bg-card);
+  box-shadow: var(--shadow-card);
+}
 .table { width: 100%; border-collapse: collapse; }
 .table th { text-align: left; padding: var(--space-4) var(--space-5); font-size: var(--font-size-xs); font-weight: var(--font-weight-semibold); text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-secondary); background: var(--gray-50); border-bottom: 1px solid var(--border-color); white-space: nowrap; }
 .table td { padding: var(--space-4) var(--space-5); border-bottom: 1px solid var(--border-color); font-size: var(--font-size-sm); vertical-align: middle; }
@@ -169,6 +196,7 @@ textarea.form-control { min-height: 120px; resize: vertical; }
 .profile-completeness {
   background: var(--bg-card); border-radius: var(--radius-xl); border: 1px solid var(--border-color);
   padding: var(--space-5) var(--space-6); margin-bottom: var(--space-6);
+  box-shadow: var(--shadow-card);
 }
 .profile-completeness h4 { font-family: var(--font-heading); font-size: var(--font-size-md); margin-bottom: var(--space-3); }
 .completeness-bar {
@@ -177,7 +205,7 @@ textarea.form-control { min-height: 120px; resize: vertical; }
 }
 .completeness-fill {
   height: 100%; border-radius: var(--radius-full);
-  background: linear-gradient(90deg, var(--accent-500), var(--success));
+  background: linear-gradient(90deg, var(--primary-500), var(--success));
   transition: width 1s cubic-bezier(0.4,0,0.2,1);
 }
 .completeness-text { font-size: var(--font-size-xs); color: var(--text-secondary); }
@@ -193,6 +221,7 @@ textarea.form-control { min-height: 120px; resize: vertical; }
 .criteria-card {
   background: var(--bg-card); border-radius: var(--radius-xl); border: 1px solid var(--border-color);
   padding: var(--space-6); margin-bottom: var(--space-6);
+  box-shadow: var(--shadow-card);
 }
 .criteria-card h4 { font-family: var(--font-heading); font-size: var(--font-size-md); margin-bottom: var(--space-4); display: flex; align-items: center; gap: var(--space-2); }
 .criteria-item {
@@ -227,7 +256,7 @@ textarea.form-control { min-height: 120px; resize: vertical; }
   position: absolute; top: var(--space-3); right: var(--space-3); z-index: 2;
 }
 .job-card-select input[type="checkbox"] {
-  width: 20px; height: 20px; accent-color: var(--accent-500); cursor: pointer;
+  width: 20px; height: 20px; accent-color: var(--primary-500); cursor: pointer;
 }
 
 /* ── Floating Compare Button ── */
@@ -252,7 +281,7 @@ textarea.form-control { min-height: 120px; resize: vertical; }
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
   animation: skeletonShimmer 2s infinite;
 }
 @keyframes skeletonShimmer {
@@ -335,7 +364,7 @@ textarea.form-control { min-height: 120px; resize: vertical; }
 .empty-state .empty-illustration {
   width: 120px; height: 120px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, var(--primary-50), var(--accent-50));
+  background: linear-gradient(135deg, var(--primary-50), var(--gray-100));
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto var(--space-6);
   font-size: 3rem;
@@ -354,5 +383,5 @@ textarea.form-control { min-height: 120px; resize: vertical; }
 .job-card-recommend:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
-  border-left-color: var(--accent-500);
+  border-left-color: var(--primary-500);
 }
